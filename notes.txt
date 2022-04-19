@@ -1,0 +1,71 @@
+Goal: Practice scripting in Ghidra
+
+This homework has 2 projects. You will develop a Ghidra script for each project.
+You are given 5 example x86_64_Linux binaries. I will test your output on any or all
+of these binaries.
+Output of my scripts on the "ispell" binary is provided to you for reference.
+
+Project 1: 
+Some functions in C are considered "dangerous" due to their inclination to
+cause memory errors. Programmers are discouraged from using these functions in their
+programs, yet these functions are widely used.
+You should write a Ghidra script to identify calls made by your program to "dangerous"
+C library functions. Find all places in the code where these functions are called.
+The list of dangerous functions is: "atoi", "gets", "strcpy", "strcat", "sprintf"
+
+For each dangerous function, print your output in the form: <FN_Name>:<Addrss>
+For instance:
+Function strcpy is referenced from:  
+main:0x4199791,  main:0x4199804,  expandmode:0x4206884,  checkfile:0x4212682,
+Function sprintf is referenced from:  
+main:0x4202172,  main:0x4202365,  expandmode:0x4207539,
+...
+
+
+
+Project 2:
+ROP, which stands for Return-Oriented Programming, is a common security attack on
+C/C++ binaries.
+These attacks use small code sequences that already exist in the binary. The attacker
+finds such code sequences to generate an attack. These small code sequences are called
+"gadgets".
+
+A ROP Gadget is a single contiguous code fragment that typically ends in a "return"
+instruction (hence, called ROP), but may also end in some other instructions.
+A ROP gadget contains some sequence of contiguous instructions that end in some
+set of instructions. Your goal is to write a script that will detect and print all
+ROP gadgets per function in the binary.
+For this project, a ROP gadget should be at least 2 instructions long.
+
+The set of allowed instructions in the ROP gadgets are the following:
+# Potential ROP Gadget instructions
+"NOP", "POP", "PUSH", "MOV", "ADD", "SUB", "MUL", "DIV", "XOR"
+# Potential ROP Gadget instructions with 0 operands
+"NOP"
+# Potential ROP Gadget instructions with 1 register operand
+"POP", "PUSH"
+# Potential ROP Gadget instructions with the fist operand a register
+"MOV", "ADD", "SUB", "MUL", "DIV", "XOR"
+
+# Instructions with 0 operands that can "end" a ROP Gadget
+"RET"
+# Instructions with only 1 "Register" operand that can "end" ROP Gadgets
+"JMP", "CALL"
+
+Print the detected ROP gadgets for each function in the binary.
+For instance:
+HW_FindROPGadgets.py> Running...
+ROP Gadgets in Function: _init
+Gadget is:  "ADD RSP,0x8",  "RET",  
+ROP Gadgets in Function: __do_global_dtors_aux
+Gadget is:  "POP RBP",  "RET",  
+ROP Gadgets in Function: clearscreen
+Gadget is:  "NOP",  "POP RBP",  "RET",  
+ROP Gadgets in Function: signon_msg
+Gadget is:  "NOP",  "ADD RSP,0x18",  "POP RBX",  "POP RBP",  "RET",  
+ROP Gadgets in Function: main
+Gadget is:  "MOV EAX,EAX",  "MOV RAX,qword ptr [0x42d568 + RAX*0x8]",  "JMP RAX",  
+ROP Gadgets in Function: initsigs
+Gadget is:  "NOP",  "POP RBP",  "RET",  
+ROP Gadgets in Function: do_decrypt
+Gadget is:  "MOV EAX,0x0",  "ADD RSP,0x348",  "POP RBX",  "POP RBP",  "RET",
